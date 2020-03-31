@@ -6,6 +6,10 @@ using System.IO.Compression;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using System.Text.Json;
+using System.Text.Json.Serialization;
+using System.Runtime.Serialization.Json;
+using WodiLib.Sys;
 using WodiLib.Common;
 using WodiLib.Database;
 using WodiLib.Ini;
@@ -221,7 +225,23 @@ namespace WodiLibSample
             // マップファイルを読み込む
             SelectedMapData = await Project.ReadMpsFileAsync(mpsFileName, false);
 
+            JsonModel.Map.MapData jsonMapData = new JsonModel.Map.MapData(SelectedMapData);
+            string jsonString = jsonMapData.ToJsonString();
+            txtShow.Text = jsonString;
+            //var hoge = new IntList();
+            //string jsonString = JsonSerializer.Serialize(hoge);
+            File.WriteAllText(@"F:\c#\map.json", jsonString);
             ClearStateMessage();
+        }
+
+        class IntList : RestrictedCapacityCollection<MapChipColumns>
+        {
+            public override int GetMaxCapacity() => 10;
+            public override int GetMinCapacity() => 5;
+            protected override MapChipColumns MakeDefaultItem(int index)
+            {
+                return new MapChipColumns();
+            }
         }
 
         /// <summary>

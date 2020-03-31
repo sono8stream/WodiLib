@@ -54,9 +54,13 @@ namespace WodiLib.IO
         public MpsFilePath(string value) : base(value)
         {
             var fileName = Path.GetFileName(value);
-            if (fileName == null)
+            /*
+            if (string.IsNullOrWhiteSpace(fileName))
+            {
                 throw new ArgumentException(
                     ErrorMessage.Unsuitable("ファイルパス", $"（パス：{value}）"));
+            }
+            */
 
             if (!FilePathRegex.IsMatch(fileName))
             {

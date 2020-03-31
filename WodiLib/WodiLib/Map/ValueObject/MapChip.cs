@@ -101,7 +101,7 @@ namespace WodiLib.Map
         {
             get
             {
-                if (!IsAutoTile) throw new PropertyAccessException("オートタイルではないため情報は取得できません");
+                if (!IsAutoTile) return null;
                 return AutoTilePartType.FromCode(LeftUpAutoTileCode);
             }
         }
@@ -112,7 +112,7 @@ namespace WodiLib.Map
         {
             get
             {
-                if (!IsAutoTile) throw new PropertyAccessException("オートタイルではないため情報は取得できません");
+                if (!IsAutoTile) return null;
                 return AutoTilePartType.FromCode(RightUpAutoTileCode);
             }
         }
@@ -123,7 +123,7 @@ namespace WodiLib.Map
         {
             get
             {
-                if (!IsAutoTile) throw new PropertyAccessException("オートタイルではないため情報は取得できません");
+                if (!IsAutoTile) return null;
                 return AutoTilePartType.FromCode(LeftDownAutoTileCode);
             }
         }
@@ -134,7 +134,7 @@ namespace WodiLib.Map
         {
             get
             {
-                if (!IsAutoTile) throw new PropertyAccessException("オートタイルではないため情報は取得できません");
+                if (!IsAutoTile) return null;
                 return AutoTilePartType.FromCode(RightDownAutoTileCode);
             }
         }
