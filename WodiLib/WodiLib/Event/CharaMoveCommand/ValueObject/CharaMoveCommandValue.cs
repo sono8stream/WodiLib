@@ -19,7 +19,7 @@ namespace WodiLib.Event.CharaMoveCommand
     ///     キャラ動作指定コマンド設定値
     /// </summary>
     [Serializable]
-    public struct CharaMoveCommandValue : IConvertibleInt, IEquatable<CharaMoveCommandValue>
+    public readonly struct CharaMoveCommandValue : IConvertibleInt, IEquatable<CharaMoveCommandValue>
     {
         // _/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/
         //     Public Constant
@@ -36,13 +36,6 @@ namespace WodiLib.Event.CharaMoveCommand
 
         /// <summary>最小値</summary>
         public static readonly int MinValue = WoditorInt.MinValue;
-
-        // _/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/
-        //     Private Static Property
-        // _/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/
-
-        /// <summary>ロガー</summary>
-        private static readonly WodiLibLogger Logger = WodiLibLogger.GetInstance();
 
         // _/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/
         //     Private Property
@@ -71,7 +64,7 @@ namespace WodiLib.Event.CharaMoveCommand
                     ErrorMessage.OutOfRange(nameof(value), MinValue, MaxValue, value));
 
             if (value < SafetyMinValue || SafetyMaxValue < value)
-                Logger.Warning(
+                WodiLibLogger.GetInstance().Warning(
                     WarningMessage.OutOfRange(nameof(value), SafetyMinValue, SafetyMaxValue, value));
 
             Value = value;

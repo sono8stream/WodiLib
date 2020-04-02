@@ -34,9 +34,6 @@ namespace WodiLib.IO
         /// <summary>[Nullable] 読み込んだデータ</summary>
         public IReadOnlyCollection<TIniTarget> Data { get; }
 
-        /// <summary>ロガー</summary>
-        private static WodiLibLogger Logger => WodiLibLogger.GetInstance();
-
         // _/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/
         //     Private Property
         // _/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/
@@ -45,6 +42,9 @@ namespace WodiLib.IO
         /// 読み込み完了フラグ
         /// </summary>
         private bool IsAlreadyRead { get; set; }
+
+        /// <summary>ロガー</summary>
+        private WodiLibLogger Logger { get; } = WodiLibLogger.GetInstance();
 
         // _/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/
         //     Constructor
@@ -61,11 +61,11 @@ namespace WodiLib.IO
         /// </exception>
         public HasSectionIniFileReader(FilePath filePath, IReadOnlyCollection<TIniTarget> targets)
         {
-            if (filePath == null)
+            if (filePath is null)
                 throw new ArgumentNullException(
                     ErrorMessage.NotNull(nameof(filePath)));
 
-            if (targets == null)
+            if (targets is null)
                 throw new ArgumentNullException(
                     ErrorMessage.NotNull(nameof(targets)));
             if (targets.HasNullItem())
@@ -116,9 +116,9 @@ namespace WodiLib.IO
         ///     すでにファイルを読み込んでいる場合、
         ///     またはファイルが正しく読み込めなかった場合
         /// </exception>
-        public async Task ReadAsync()
+        public async Task<IEnumerable<TIniTarget>> ReadAsync()
         {
-            await Task.Run(ReadSync);
+            return await Task.Run(ReadSync);
         }
 
         // _/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/

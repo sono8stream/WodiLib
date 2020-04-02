@@ -27,7 +27,7 @@ namespace WodiLib.IO
         public EditorIniData Data { get; private set; }
 
         /// <summary>ロガー</summary>
-        private static WodiLibLogger Logger { get; } = WodiLibLogger.GetInstance();
+        private WodiLibLogger Logger { get; } = WodiLibLogger.GetInstance();
 
         /// <summary>
         /// コンストラクタ
@@ -36,7 +36,7 @@ namespace WodiLib.IO
         /// <exception cref="ArgumentNullException">filePathがnullの場合</exception>
         public EditorIniFileReader(EditorIniFilePath filePath)
         {
-            if (filePath == null)
+            if (filePath is null)
                 throw new ArgumentNullException(
                     ErrorMessage.NotNull(nameof(filePath)));
 
@@ -53,7 +53,7 @@ namespace WodiLib.IO
         /// </exception>
         public EditorIniData ReadSync()
         {
-            if (Data != null)
+            if (!(Data is null))
                 throw new InvalidOperationException(
                     "すでに読み込み完了しています。");
 
@@ -74,9 +74,9 @@ namespace WodiLib.IO
         ///     すでにファイルを読み込んでいる場合、
         ///     またはファイルが正しく読み込めなかった場合
         /// </exception>
-        public async Task ReadAsync()
+        public async Task<EditorIniData> ReadAsync()
         {
-            await Task.Run(ReadSync);
+            return await Task.Run(ReadSync);
         }
 
         // _/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/

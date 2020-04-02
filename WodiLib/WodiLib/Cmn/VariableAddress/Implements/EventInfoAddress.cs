@@ -57,13 +57,6 @@ namespace WodiLib.Cmn
         protected override int _MaxValue => MaxValue;
 
         // _/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/
-        //     Private Static Property
-        // _/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/
-
-        /// <summary>ロガー</summary>
-        private static readonly WodiLibLogger Logger = WodiLibLogger.GetInstance();
-
-        // _/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/
         //     Public Property
         // _/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/
 
@@ -109,7 +102,7 @@ namespace WodiLib.Cmn
                 // ウディタVer2.01未満では非対応
                 if (infoCode == 5 || infoCode == 6)
                 {
-                    Logger.Warning(VersionWarningMessage.NotUnderInVariableAddress(
+                    WodiLibLogger.GetInstance().Warning(VersionWarningMessage.NotUnderInVariableAddress(
                         value,
                         VersionConfig.GetConfigWoditorVersion(),
                         WoditorVersion.Ver2_01));
@@ -118,7 +111,7 @@ namespace WodiLib.Cmn
 
             if (infoCode == 7 || infoCode == 8)
             {
-                Logger.Warning(VersionWarningMessage.NotUsingVariableAddress(value));
+                WodiLibLogger.GetInstance().Warning(VersionWarningMessage.NotUsingVariableAddress(value));
             }
         }
 
@@ -152,7 +145,7 @@ namespace WodiLib.Cmn
         /// <returns>一致する場合、true</returns>
         public bool Equals(EventInfoAddress other)
         {
-            return other != null && Value == other.Value;
+            return !(other is null) && Value == other.Value;
         }
 
         // _/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/
@@ -191,8 +184,15 @@ namespace WodiLib.Cmn
         /// </summary>
         /// <param name="src">変換元</param>
         /// <returns>変換したインスタンス</returns>
+        /// <exception cref="InvalidCastException">
+        ///     src が null の場合
+        /// </exception>
         public static implicit operator int(EventInfoAddress src)
         {
+            if (src is null)
+                throw new InvalidCastException(
+                    ErrorMessage.InvalidCastFromNull(nameof(src), nameof(EventInfoAddress)));
+
             return src.Value;
         }
 
@@ -208,9 +208,16 @@ namespace WodiLib.Cmn
         /// <param name="src">変数アドレス</param>
         /// <param name="value">加算値</param>
         /// <returns>加算後のインスタンス</returns>
-        /// <exception cref="InvalidOperationException">加算後の値がイベント座標アドレス値として不適切な場合</exception>
+        /// <exception cref="InvalidOperationException">
+        ///     left が null の場合、または
+        ///     加算後の値がイベント座標アドレス値として不適切な場合
+        /// </exception>
         public static EventInfoAddress operator +(EventInfoAddress src, int value)
         {
+            if (src is null)
+                throw new InvalidOperationException(
+                    ErrorMessage.NotNull("左オペランド"));
+
             try
             {
                 return new EventInfoAddress(src.Value + value);
@@ -228,9 +235,19 @@ namespace WodiLib.Cmn
         /// <param name="src">変数アドレス</param>
         /// <param name="value">減算値</param>
         /// <returns>減算後のインスタンス</returns>
-        /// <exception cref="InvalidOperationException">減算後の値がイベント座標アドレス値値として不適切な場合</exception>
+        /// <exception cref="ArgumentNullException">
+        ///    left, right が null の場合
+        /// </exception>
+        /// <exception cref="InvalidOperationException">
+        ///     left が null の場合、または
+        ///     減算後の値がイベント座標アドレス値値として不適切な場合
+        /// </exception>
         public static EventInfoAddress operator -(EventInfoAddress src, int value)
         {
+            if (src is null)
+                throw new InvalidOperationException(
+                    ErrorMessage.NotNull("左オペランド"));
+
             try
             {
                 return new EventInfoAddress(src.Value - value);
@@ -252,8 +269,18 @@ namespace WodiLib.Cmn
         /// <param name="left">アドレス左辺</param>
         /// <param name="right">アドレス右辺</param>
         /// <returns>アドレス値の差</returns>
+        /// <exception cref="InvalidOperationException">
+        ///    left, right が null の場合
+        /// </exception>
         public static int operator -(EventInfoAddress left, VariableAddress right)
         {
+            if (left is null)
+                throw new InvalidOperationException(
+                    ErrorMessage.NotNull("左オペランド"));
+            if (right is null)
+                throw new InvalidOperationException(
+                    ErrorMessage.NotNull("右オペランド"));
+
             return left.Value - right;
         }
 
@@ -293,8 +320,18 @@ namespace WodiLib.Cmn
         /// <param name="left">イベント座標アドレス左辺</param>
         /// <param name="right">イベント座標アドレス右辺</param>
         /// <returns>イベント座標アドレス値の差</returns>
+        /// <exception cref="InvalidOperationException">
+        ///    left, right が null の場合
+        /// </exception>
         public static int operator -(EventInfoAddress left, EventInfoAddress right)
         {
+            if (left is null)
+                throw new InvalidOperationException(
+                    ErrorMessage.NotNull("左オペランド"));
+            if (right is null)
+                throw new InvalidOperationException(
+                    ErrorMessage.NotNull("右オペランド"));
+
             return left.Value - right.Value;
         }
 

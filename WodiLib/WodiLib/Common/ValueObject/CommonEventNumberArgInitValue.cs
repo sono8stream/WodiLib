@@ -19,7 +19,7 @@ namespace WodiLib.Common
     ///     コモンイベント数値引数初期値
     /// </summary>
     [Serializable]
-    public struct CommonEventNumberArgInitValue : IConvertibleInt, IEquatable<CommonEventNumberArgInitValue>
+    public readonly struct CommonEventNumberArgInitValue : IConvertibleInt, IEquatable<CommonEventNumberArgInitValue>
     {
         // _/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/
         //     Public Constant
@@ -36,13 +36,6 @@ namespace WodiLib.Common
 
         /// <summary>最小値</summary>
         public static readonly int MinValue = int.MinValue;
-
-        // _/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/
-        //     Private Static Property
-        // _/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/
-
-        /// <summary>ロガー</summary>
-        private static readonly WodiLibLogger Logger = WodiLibLogger.GetInstance();
 
         // _/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/
         //     Private Property
@@ -71,7 +64,7 @@ namespace WodiLib.Common
                     ErrorMessage.OutOfRange(nameof(value), MinValue, MaxValue, value));
 
             if (value < SafetyMinValue || SafetyMaxValue < value)
-                Logger.Warning(
+                WodiLibLogger.GetInstance().Warning(
                     WarningMessage.OutOfRange(nameof(value), SafetyMinValue, SafetyMaxValue, value));
 
             Value = value;

@@ -15,7 +15,7 @@ namespace WodiLib.Map
     /// 座標
     /// </summary>
     [Serializable]
-    public struct Position : IEquatable<Position>
+    public readonly struct Position : IEquatable<Position>
     {
         // _/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/
         //     Public Constant
@@ -110,8 +110,15 @@ namespace WodiLib.Map
         /// </summary>
         /// <param name="tuple">変換元</param>
         /// <returns>変換した値</returns>
+        /// <exception cref="InvalidCastException">
+        ///     tuple が null の場合
+        /// </exception>
         public static implicit operator Position(Tuple<int, int> tuple)
         {
+            if (tuple is null)
+                throw new InvalidCastException(
+                    ErrorMessage.InvalidCastFromNull(nameof(tuple), nameof(Position)));
+
             return new Position(tuple.Item1, tuple.Item2);
         }
 

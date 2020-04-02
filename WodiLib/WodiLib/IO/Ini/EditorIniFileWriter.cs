@@ -27,7 +27,7 @@ namespace WodiLib.IO
         public EditorIniData Data { get; }
 
         /// <summary>ロガー</summary>
-        private static WodiLibLogger Logger { get; } = WodiLibLogger.GetInstance();
+        private WodiLibLogger Logger { get; } = WodiLibLogger.GetInstance();
 
         /// <summary>
         /// コンストラクタ
@@ -37,10 +37,10 @@ namespace WodiLib.IO
         /// <exception cref="ArgumentNullException">outputData, filePathがnullの場合</exception>
         public EditorIniFileWriter(EditorIniData outputData, EditorIniFilePath filePath)
         {
-            if (outputData == null)
+            if (outputData is null)
                 throw new ArgumentNullException(
                     ErrorMessage.NotNull(nameof(outputData)));
-            if (filePath == null)
+            if (filePath is null)
                 throw new ArgumentNullException(
                     ErrorMessage.NotNull(nameof(filePath)));
 

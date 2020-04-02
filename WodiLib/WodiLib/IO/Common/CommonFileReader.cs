@@ -26,10 +26,10 @@ namespace WodiLib.IO
         public CommonFileData CommonFileData { get; private set; }
 
         /// <summary>ファイル読み込みステータス</summary>
-        private FileReadStatus ReadStatus { get; set; }
+        private FileReadStatus ReadStatus { get; }
 
         /// <summary>ロガー</summary>
-        private static WodiLibLogger Logger { get; } = WodiLibLogger.GetInstance();
+        private WodiLibLogger Logger { get; } = WodiLibLogger.GetInstance();
 
         /// <summary>
         /// コンストラクタ
@@ -38,11 +38,12 @@ namespace WodiLib.IO
         /// <exception cref="ArgumentNullException">filePathがnullの場合</exception>
         public CommonFileReader(CommonFilePath filePath)
         {
-            if (filePath == null)
+            if (filePath is null)
                 throw new ArgumentNullException(
                     ErrorMessage.NotNull(nameof(filePath)));
 
             FilePath = filePath;
+            ReadStatus = new FileReadStatus(FilePath);
         }
 
         /// <summary>
@@ -57,11 +58,10 @@ namespace WodiLib.IO
         {
             Logger.Info(FileIOMessage.StartFileRead(GetType()));
 
-            if (CommonFileData != null)
+            if (!(CommonFileData is null))
                 throw new InvalidOperationException(
                     "すでに読み込み完了しています。");
 
-            ReadStatus = new FileReadStatus(FilePath);
             CommonFileData = new CommonFileData();
 
             // ヘッダチェック
@@ -83,9 +83,9 @@ namespace WodiLib.IO
         ///     すでにファイルを読み込んでいる場合、
         ///     またはファイルが正しく読み込めなかった場合
         /// </exception>
-        public async Task ReadAsync()
+        public async Task<CommonFileData> ReadAsync()
         {
-            await Task.Run(ReadSync);
+            return await Task.Run(ReadSync);
         }
 
         // _/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/
@@ -97,7 +97,7 @@ namespace WodiLib.IO
         /// </summary>
         /// <param name="status">読み込み経過状態</param>
         /// <exception cref="InvalidOperationException">ファイルヘッダが仕様と異なる場合</exception>
-        private static void ReadHeader(FileReadStatus status)
+        private void ReadHeader(FileReadStatus status)
         {
             foreach (var b in CommonFileData.Header)
             {
@@ -119,7 +119,7 @@ namespace WodiLib.IO
         /// <param name="status">読み込み経過状態</param>
         /// <param name="data">結果格納インスタンス</param>
         /// <exception cref="InvalidOperationException">ファイルが仕様と異なる場合</exception>
-        private static void ReadCommonEvent(FileReadStatus status, CommonFileData data)
+        private void ReadCommonEvent(FileReadStatus status, CommonFileData data)
         {
             // コモンイベント数
             var length = ReadCommonEventLength(status);
@@ -134,7 +134,7 @@ namespace WodiLib.IO
         /// </summary>
         /// <param name="status">読み込み経過状態</param>
         /// <returns>コモンイベント数</returns>
-        private static int ReadCommonEventLength(FileReadStatus status)
+        private int ReadCommonEventLength(FileReadStatus status)
         {
             var length = status.ReadInt();
             status.IncreaseIntOffset();
@@ -151,7 +151,7 @@ namespace WodiLib.IO
         /// <param name="length">コモンイベント数</param>
         /// <param name="data">結果格納インスタンス</param>
         /// <exception cref="InvalidOperationException">ファイルが仕様と異なる場合</exception>
-        private static void ReadCommonEventList(FileReadStatus status, int length, CommonFileData data)
+        private void ReadCommonEventList(FileReadStatus status, int length, CommonFileData data)
         {
             var reader = new CommonEventReader(status, length);
 

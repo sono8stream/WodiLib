@@ -28,7 +28,7 @@ namespace WodiLib.IO
         public CommonFileData CommonFileData { get; }
 
         /// <summary>ロガー</summary>
-        private static WodiLibLogger Logger { get; } = WodiLibLogger.GetInstance();
+        private WodiLibLogger Logger { get; } = WodiLibLogger.GetInstance();
 
         /// <summary>
         /// コンストラクタ
@@ -39,10 +39,10 @@ namespace WodiLib.IO
         /// <exception cref="ArgumentException">filePathが空文字の場合</exception>
         public CommonFileWriter(CommonFileData outputData, CommonFilePath filePath)
         {
-            if (outputData == null)
+            if (outputData is null)
                 throw new ArgumentNullException(
                     ErrorMessage.NotNull(nameof(outputData)));
-            if (filePath == null)
+            if (filePath is null)
                 throw new ArgumentNullException(
                     ErrorMessage.NotNull(nameof(filePath)));
 

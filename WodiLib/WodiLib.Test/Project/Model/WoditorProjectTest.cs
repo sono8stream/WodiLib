@@ -27,7 +27,8 @@ namespace WodiLib.Test.Project.Model
         [SetUp]
         public static void Setup()
         {
-            LoggerInitializer.SetupWodiLibLoggerForDebug();
+            // デバッグ情報等まで出力すると出力に時間がかかりすぎてAbortするためログレベルを抑える
+            LoggerInitializer.SetupWodiLibLoggerForProjectTest();
             logger = WodiLibLogger.GetInstance();
         }
 
@@ -152,6 +153,27 @@ namespace WodiLib.Test.Project.Model
             try
             {
                 instance.ReadMapTreeOpenStatusDataSync();
+            }
+            catch (Exception ex)
+            {
+                logger.Exception(ex);
+                errorOccured = true;
+            }
+
+            // エラーが発生しないこと
+            Assert.IsFalse(errorOccured);
+        }
+
+
+        [Test]
+        public static void ReadTileSetDataSyncTest()
+        {
+            var instance = new WoditorProject(TestProjectDir);
+
+            var errorOccured = false;
+            try
+            {
+                instance.ReadTileSetDataSync();
             }
             catch (Exception ex)
             {
@@ -320,6 +342,27 @@ namespace WodiLib.Test.Project.Model
             try
             {
                 await instance.ReadMapTreeOpenStatusDataAsync();
+            }
+            catch (Exception ex)
+            {
+                logger.Exception(ex);
+                errorOccured = true;
+            }
+
+            // エラーが発生しないこと
+            Assert.IsFalse(errorOccured);
+        }
+
+
+        [Test]
+        public static async Task ReadTileSetDataAsyncTest()
+        {
+            var instance = new WoditorProject(TestProjectDir);
+
+            var errorOccured = false;
+            try
+            {
+                await instance.ReadTileSetDataAsync();
             }
             catch (Exception ex)
             {

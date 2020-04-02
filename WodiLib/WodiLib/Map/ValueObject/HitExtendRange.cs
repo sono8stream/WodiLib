@@ -18,7 +18,7 @@ namespace WodiLib.Map
     ///     接触範囲拡張
     /// </summary>
     [Serializable]
-    public struct HitExtendRange : IEquatable<HitExtendRange>
+    public readonly struct HitExtendRange : IEquatable<HitExtendRange>
     {
         // _/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/
         //     Public Constant
@@ -47,13 +47,6 @@ namespace WodiLib.Map
 
         /// <summary>高さ最小値</summary>
         public static readonly int MinValue_Height = 0;
-
-        // _/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/
-        //     Private Static Property
-        // _/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/
-
-        /// <summary>ロガー</summary>
-        private static readonly WodiLibLogger Logger = WodiLibLogger.GetInstance();
 
         // _/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/
         //     Public Property
@@ -101,11 +94,11 @@ namespace WodiLib.Map
                     ErrorMessage.OutOfRange(nameof(height), MinValue_Height, MaxValue_Height, height));
 
             if (width < SafetyMinValue_Width || SafetyMaxValue_Width < width)
-                Logger.Warning(
+                WodiLibLogger.GetInstance().Warning(
                     WarningMessage.OutOfRange(nameof(width), SafetyMinValue_Width,
                         SafetyMaxValue_Width, width));
             if (height < SafetyMinValue_Height || SafetyMaxValue_Height < height)
-                Logger.Warning(
+                WodiLibLogger.GetInstance().Warning(
                     WarningMessage.OutOfRange(nameof(height), SafetyMinValue_Height,
                         SafetyMaxValue_Height, height));
 
@@ -162,8 +155,15 @@ namespace WodiLib.Map
         /// </summary>
         /// <param name="tuple">変換元</param>
         /// <returns>変換した値</returns>
+        /// <exception cref="InvalidCastException">
+        ///     tuple が null の場合
+        /// </exception>
         public static implicit operator HitExtendRange(Tuple<byte, byte> tuple)
         {
+            if (tuple is null)
+                throw new InvalidCastException(
+                    ErrorMessage.InvalidCastFromNull(nameof(tuple), nameof(HitExtendRange)));
+
             return new HitExtendRange(tuple.Item1, tuple.Item2);
         }
 

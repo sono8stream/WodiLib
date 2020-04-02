@@ -35,10 +35,10 @@ namespace WodiLib.IO
         // _/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/
 
         /// <summary>ファイル読み込みステータス</summary>
-        private FileReadStatus ReadStatus { get; set; }
+        private FileReadStatus ReadStatus { get; }
 
         /// <summary>ロガー</summary>
-        private static WodiLibLogger Logger { get; } = WodiLibLogger.GetInstance();
+        private WodiLibLogger Logger { get; } = WodiLibLogger.GetInstance();
 
         // _/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/
         //     Public Property
@@ -51,7 +51,7 @@ namespace WodiLib.IO
         /// <exception cref="ArgumentNullException">filePathがnullの場合</exception>
         public DBTypeFileReader(string filePath)
         {
-            if (filePath == null)
+            if (filePath is null)
                 throw new ArgumentNullException(
                     ErrorMessage.NotNull(nameof(filePath)));
             if (filePath.IsEmpty())
@@ -59,6 +59,7 @@ namespace WodiLib.IO
                     ErrorMessage.NotEmpty(nameof(filePath)));
 
             FilePath = filePath;
+            ReadStatus = new FileReadStatus(FilePath);
         }
 
         // _/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/
@@ -77,11 +78,10 @@ namespace WodiLib.IO
         {
             Logger.Info(FileIOMessage.StartFileRead(GetType()));
 
-            if (Data != null)
+            if (!(Data is null))
                 throw new InvalidOperationException(
                     $"すでに読み込み完了しています。");
 
-            ReadStatus = new FileReadStatus(FilePath);
             Data = new DBType();
 
             // ヘッダチェック
@@ -113,9 +113,9 @@ namespace WodiLib.IO
         ///     すでにファイルを読み込んでいる場合、
         ///     またはファイルが正しく読み込めなかった場合
         /// </exception>
-        public async Task ReadAsync()
+        public async Task<DBType> ReadAsync()
         {
-            await Task.Run(ReadSync);
+            return await Task.Run(ReadSync);
         }
 
         // _/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/
@@ -127,7 +127,7 @@ namespace WodiLib.IO
         /// </summary>
         /// <param name="status">読み込み経過状態</param>
         /// <exception cref="InvalidOperationException">ファイルヘッダが仕様と異なる場合</exception>
-        private static void ReadHeader(FileReadStatus status)
+        private void ReadHeader(FileReadStatus status)
         {
             foreach (var b in DBType.Header)
             {
@@ -149,7 +149,7 @@ namespace WodiLib.IO
         /// </summary>
         /// <param name="status">読み込み経過状態</param>
         /// <param name="typeSetting">読み込み結果インスタンス</param>
-        private static void ReadTypeSetting(FileReadStatus status, out DBTypeSetting typeSetting)
+        private void ReadTypeSetting(FileReadStatus status, out DBTypeSetting typeSetting)
         {
             Logger.Debug(FileIOMessage.StartCommonRead(typeof(DBTypeFileReader),
                 "タイプ設定"));
@@ -168,7 +168,7 @@ namespace WodiLib.IO
         /// </summary>
         /// <param name="status">読み込み経過状態</param>
         /// <param name="dataSetting">読み込み結果インスタンス</param>
-        private static void ReadDataSetting(FileReadStatus status, out DBDataSetting dataSetting)
+        private void ReadDataSetting(FileReadStatus status, out DBDataSetting dataSetting)
         {
             Logger.Debug(FileIOMessage.StartCommonRead(typeof(DBTypeFileReader),
                 "データ設定"));
@@ -188,7 +188,7 @@ namespace WodiLib.IO
         /// <param name="typeSetting">タイプ設定</param>
         /// <param name="dataSetting">データ設定</param>
         /// <returns></returns>
-        private static IReadOnlyList<DatabaseDataDesc> MakeDataDescList(DBTypeSetting typeSetting,
+        private IReadOnlyList<DatabaseDataDesc> MakeDataDescList(DBTypeSetting typeSetting,
             DBDataSetting dataSetting)
         {
             var result = new List<DatabaseDataDesc>();
@@ -211,7 +211,7 @@ namespace WodiLib.IO
             return result;
         }
 
-        private static IReadOnlyList<DatabaseItemDesc> MakeItemDescList(DBTypeSetting typeSetting,
+        private IReadOnlyList<DatabaseItemDesc> MakeItemDescList(DBTypeSetting typeSetting,
             DBDataSetting dataSetting)
         {
             var result = new List<DatabaseItemDesc>();

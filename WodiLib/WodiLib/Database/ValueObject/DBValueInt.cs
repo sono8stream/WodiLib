@@ -19,7 +19,7 @@ namespace WodiLib.Database
     ///     DB設定数値
     /// </summary>
     [Serializable]
-    public struct DBValueInt : IConvertibleInt, IEquatable<DBValueInt>
+    public readonly struct DBValueInt : IConvertibleInt, IEquatable<DBValueInt>
     {
         // _/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/
         //     Public Constant
@@ -36,13 +36,6 @@ namespace WodiLib.Database
 
         /// <summary>最小値</summary>
         public static readonly int MinValue = int.MinValue;
-
-        // _/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/
-        //     Private Static Property
-        // _/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/
-
-        /// <summary>ロガー</summary>
-        private static readonly WodiLibLogger Logger = WodiLibLogger.GetInstance();
 
         // _/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/
         //     Private Property
@@ -71,7 +64,7 @@ namespace WodiLib.Database
                     ErrorMessage.OutOfRange(nameof(value), MinValue, MaxValue, value));
 
             if (value < SafetyMinValue || SafetyMaxValue < value)
-                Logger.Warning(
+                WodiLibLogger.GetInstance().Warning(
                     WarningMessage.OutOfRange(nameof(value), SafetyMinValue, SafetyMaxValue, value));
 
             Value = value;

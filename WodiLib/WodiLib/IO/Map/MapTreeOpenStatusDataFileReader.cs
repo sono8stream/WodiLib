@@ -26,10 +26,10 @@ namespace WodiLib.IO
         /// <summary>[Nullable] 読み込んだデータ</summary>
         public MapTreeOpenStatusData Data { get; private set; }
 
-        private FileReadStatus ReadStatus { get; set; }
+        private FileReadStatus ReadStatus { get; }
 
         /// <summary>ロガー</summary>
-        private static WodiLibLogger Logger { get; } = WodiLibLogger.GetInstance();
+        private WodiLibLogger Logger { get; } = WodiLibLogger.GetInstance();
 
         /// <summary>
         /// コンストラクタ
@@ -38,11 +38,12 @@ namespace WodiLib.IO
         /// <exception cref="ArgumentNullException">filePathがnullの場合</exception>
         public MapTreeOpenStatusDataFileReader(MapTreeOpenStatusDataFilePath filePath)
         {
-            if (filePath == null)
+            if (filePath is null)
                 throw new ArgumentNullException(
                     ErrorMessage.NotNull(nameof(filePath)));
 
             FilePath = filePath;
+            ReadStatus = new FileReadStatus(FilePath);
         }
 
         /// <summary>
@@ -55,13 +56,12 @@ namespace WodiLib.IO
         /// </exception>
         public MapTreeOpenStatusData ReadSync()
         {
-            if (Data != null)
+            if (!(Data is null))
                 throw new InvalidOperationException(
                     "すでに読み込み完了しています。");
 
             Logger.Info(FileIOMessage.StartFileRead(GetType()));
 
-            ReadStatus = new FileReadStatus(FilePath);
             Data = ReadData(ReadStatus);
 
             Logger.Info(FileIOMessage.EndFileRead(GetType()));
@@ -77,9 +77,9 @@ namespace WodiLib.IO
         ///     すでにファイルを読み込んでいる場合、
         ///     またはファイルが正しく読み込めなかった場合
         /// </exception>
-        public async Task ReadAsync()
+        public async Task<MapTreeOpenStatusData> ReadAsync()
         {
-            await Task.Run(ReadSync);
+            return await Task.Run(ReadSync);
         }
 
         // _/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/
@@ -91,7 +91,7 @@ namespace WodiLib.IO
         /// </summary>
         /// <param name="status">読み込み経過状態</param>
         /// <returns>読み込んだデータインスタンス</returns>
-        private static MapTreeOpenStatusData ReadData(FileReadStatus status)
+        private MapTreeOpenStatusData ReadData(FileReadStatus status)
         {
             // ヘッダ
             ReadHeader(status);
@@ -113,7 +113,7 @@ namespace WodiLib.IO
         /// </summary>
         /// <param name="status">読み込み経過状態</param>
         /// <exception cref="InvalidOperationException">ファイルヘッダが仕様と異なる場合</exception>
-        private static void ReadHeader(FileReadStatus status)
+        private void ReadHeader(FileReadStatus status)
         {
             foreach (var b in MapTreeOpenStatusData.Header)
             {
@@ -135,7 +135,7 @@ namespace WodiLib.IO
         /// </summary>
         /// <param name="status">読み込み経過状態</param>
         /// <param name="statuses">読み込み結果格納インスタンス</param>
-        private static void ReadOpenStatusList(FileReadStatus status, out List<MapTreeOpenState> statuses)
+        private void ReadOpenStatusList(FileReadStatus status, out List<MapTreeOpenState> statuses)
         {
             // ステータス数
             var length = status.ReadInt();
@@ -163,7 +163,7 @@ namespace WodiLib.IO
         /// </summary>
         /// <param name="status">読み込み経過状態</param>
         /// <exception cref="InvalidOperationException">ファイルフッタが仕様と異なる場合</exception>
-        private static void ReadFooter(FileReadStatus status)
+        private void ReadFooter(FileReadStatus status)
         {
             foreach (var b in MapTreeOpenStatusData.Footer)
             {

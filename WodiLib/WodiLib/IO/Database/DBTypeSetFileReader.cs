@@ -35,10 +35,10 @@ namespace WodiLib.IO
         // _/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/
 
         /// <summary>ファイル読み込みステータス</summary>
-        private FileReadStatus ReadStatus { get; set; }
+        private FileReadStatus ReadStatus { get; }
 
         /// <summary>ロガー</summary>
-        private static WodiLibLogger Logger { get; } = WodiLibLogger.GetInstance();
+        private WodiLibLogger Logger { get; } = WodiLibLogger.GetInstance();
 
         // _/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/
         //     Public Property
@@ -51,7 +51,7 @@ namespace WodiLib.IO
         /// <exception cref="ArgumentNullException">filePathがnullの場合</exception>
         public DBTypeSetFileReader(string filePath)
         {
-            if (filePath == null)
+            if (filePath is null)
                 throw new ArgumentNullException(
                     ErrorMessage.NotNull(nameof(filePath)));
             if (filePath.IsEmpty())
@@ -59,6 +59,7 @@ namespace WodiLib.IO
                     ErrorMessage.NotEmpty(nameof(filePath)));
 
             FilePath = filePath;
+            ReadStatus = new FileReadStatus(FilePath);
         }
 
         // _/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/
@@ -77,11 +78,10 @@ namespace WodiLib.IO
         {
             Logger.Info(FileIOMessage.StartFileRead(GetType()));
 
-            if (Data != null)
+            if (!(Data is null))
                 throw new InvalidOperationException(
                     $"すでに読み込み完了しています。");
 
-            ReadStatus = new FileReadStatus(FilePath);
             Data = new DBTypeSet();
 
             // ヘッダチェック
@@ -106,9 +106,9 @@ namespace WodiLib.IO
         ///     すでにファイルを読み込んでいる場合、
         ///     またはファイルが正しく読み込めなかった場合
         /// </exception>
-        public async Task ReadAsync()
+        public async Task<DBTypeSet> ReadAsync()
         {
-            await Task.Run(ReadSync);
+            return await Task.Run(ReadSync);
         }
 
         // _/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/
@@ -120,7 +120,7 @@ namespace WodiLib.IO
         /// </summary>
         /// <param name="status">読み込み経過状態</param>
         /// <exception cref="InvalidOperationException">ファイルヘッダが仕様と異なる場合</exception>
-        private static void ReadHeader(FileReadStatus status)
+        private void ReadHeader(FileReadStatus status)
         {
             foreach (var b in DBTypeSet.Header)
             {
@@ -142,7 +142,7 @@ namespace WodiLib.IO
         /// </summary>
         /// <param name="status">読み込み経過状態</param>
         /// <param name="itemTypes">取得した項目種別リスト格納先</param>
-        private static void ReadValueType(FileReadStatus status, out List<DBItemType> itemTypes)
+        private void ReadValueType(FileReadStatus status, out List<DBItemType> itemTypes)
         {
             var length = status.ReadInt();
             status.IncreaseIntOffset();
@@ -180,7 +180,7 @@ namespace WodiLib.IO
                 typeof(DBDataSettingReader), "項目設定種別"));
         }
 
-        private static void ReadTypeSetting(FileReadStatus status, DBTypeSet data, IReadOnlyList<DBItemType> itemTypes)
+        private void ReadTypeSetting(FileReadStatus status, DBTypeSet data, IReadOnlyList<DBItemType> itemTypes)
         {
             Logger.Debug(FileIOMessage.StartCommonRead(typeof(DBTypeSetFileReader),
                 "タイプ設定"));

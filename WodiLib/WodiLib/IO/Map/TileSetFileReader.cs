@@ -25,10 +25,10 @@ namespace WodiLib.IO
         /// <summary>[Nullable] 読み込んだデータ</summary>
         public TileSetFileData Data { get; private set; }
 
-        private FileReadStatus ReadStatus { get; set; }
+        private FileReadStatus ReadStatus { get; }
 
         /// <summary>ロガー</summary>
-        private static WodiLibLogger Logger { get; } = WodiLibLogger.GetInstance();
+        private WodiLibLogger Logger { get; } = WodiLibLogger.GetInstance();
 
         /// <summary>
         /// コンストラクタ
@@ -37,11 +37,12 @@ namespace WodiLib.IO
         /// <exception cref="ArgumentNullException">filePathがnullの場合</exception>
         public TileSetFileReader(TileSetFilePath filePath)
         {
-            if (filePath == null)
+            if (filePath is null)
                 throw new ArgumentNullException(
                     ErrorMessage.NotNull(nameof(filePath)));
 
             FilePath = filePath;
+            ReadStatus = new FileReadStatus(FilePath);
         }
 
         /// <summary>
@@ -60,7 +61,6 @@ namespace WodiLib.IO
 
             Logger.Info(FileIOMessage.StartFileRead(GetType()));
 
-            ReadStatus = new FileReadStatus(FilePath);
             Data = ReadData(ReadStatus);
 
             Logger.Info(FileIOMessage.EndFileRead(GetType()));
@@ -76,9 +76,9 @@ namespace WodiLib.IO
         ///     すでにファイルを読み込んでいる場合、
         ///     またはファイルが正しく読み込めなかった場合
         /// </exception>
-        public async Task ReadAsync()
+        public async Task<TileSetFileData> ReadAsync()
         {
-            await Task.Run(ReadSync);
+            return await Task.Run(ReadSync);
         }
 
         // _/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/
@@ -90,7 +90,7 @@ namespace WodiLib.IO
         /// </summary>
         /// <param name="status">読み込み経過状態</param>
         /// <returns>読み込んだデータインスタンス</returns>
-        private static TileSetFileData ReadData(FileReadStatus status)
+        private TileSetFileData ReadData(FileReadStatus status)
         {
             // ヘッダ
             ReadHeader(status);
@@ -112,7 +112,7 @@ namespace WodiLib.IO
         /// </summary>
         /// <param name="status">読み込み経過状態</param>
         /// <exception cref="InvalidOperationException">ファイルヘッダが仕様と異なる場合</exception>
-        private static void ReadHeader(FileReadStatus status)
+        private void ReadHeader(FileReadStatus status)
         {
             foreach (var b in TileSetFileData.Header)
             {
@@ -134,7 +134,7 @@ namespace WodiLib.IO
         /// </summary>
         /// <param name="status"></param>
         /// <param name="setting"></param>
-        private static void ReadTileSetSetting(FileReadStatus status, out TileSetSetting setting)
+        private void ReadTileSetSetting(FileReadStatus status, out TileSetSetting setting)
         {
             var reader = new TileSetSettingReader(status);
 
@@ -146,7 +146,7 @@ namespace WodiLib.IO
         /// </summary>
         /// <param name="status">読み込み経過状態</param>
         /// <exception cref="InvalidOperationException">ファイルフッタが仕様と異なる場合</exception>
-        private static void ReadFooter(FileReadStatus status)
+        private void ReadFooter(FileReadStatus status)
         {
             foreach (var b in TileSetFileData.Footer)
             {
