@@ -226,11 +226,14 @@ namespace WodiLibSample
             SelectedMapData = await Project.ReadMpsFileAsync(mpsFileName, false);
 
             JsonModel.Map.MapData jsonMapData = new JsonModel.Map.MapData(SelectedMapData);
-            string jsonString = jsonMapData.ToJsonString();
-            txtShow.Text = jsonString;
-            //var hoge = new IntList();
-            //string jsonString = JsonSerializer.Serialize(hoge);
-            File.WriteAllText(@"F:\c#\map.json", jsonString);
+            string jsonMapString = jsonMapData.ToJsonString();
+            File.WriteAllText(@"F:\c#\map.json", jsonMapString);
+            txtShow.Text = jsonMapString;
+            int id = SelectedMapData.TileSetId;
+            JsonModel.Map.TileSetSetting jsonTileSetSetting
+                = new JsonModel.Map.TileSetSetting(project.TileSetSettingList[id]);
+            string jsonTileString = jsonTileSetSetting.ToJsonString();
+            File.WriteAllText(@"F:\c#\tile.json", jsonTileString);
             ClearStateMessage();
         }
 
