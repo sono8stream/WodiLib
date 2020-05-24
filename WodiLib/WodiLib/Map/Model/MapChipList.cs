@@ -8,10 +8,12 @@
 
 using System;
 using System.Collections.Generic;
+using System.Collections.Specialized;
 using System.ComponentModel;
 using System.Linq;
 using System.Runtime.Serialization;
 using WodiLib.Sys;
+using ThisPropertyChangedHelper = WodiLib.Map.MapChipListCollectionChangedHelper;
 
 namespace WodiLib.Map
 {
@@ -43,15 +45,43 @@ namespace WodiLib.Map
         public MapSizeHeight Height => Items.Count > 0 ? Items[0].Count : MinCapacity;
 
         // _/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/
+        //     InnerNotifyChanged
+        // _/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/
+
+        /// <summary>
+        /// 自身コレクション変更通知
+        /// </summary>
+        /// <param name="sender">送信元</param>
+        /// <param name="args">情報</param>
+        private void OnThisCollectionChanged(object sender, NotifyCollectionChangedEventArgs args)
+        {
+            ThisPropertyChangedHelper.UpdateItemPropertyChangedEvent(args, Items, OnItem0PropertyChanged);
+        }
+
+        /// <summary>
+        /// 要素0のプロパティ変更通知
+        /// </summary>
+        /// <param name="sender">送信元</param>
+        /// <param name="args">情報</param>
+        private void OnItem0PropertyChanged(object sender, PropertyChangedEventArgs args)
+        {
+            switch (args.PropertyName)
+            {
+                case nameof(Count):
+                    NotifyPropertyChanged(nameof(Height));
+                    break;
+            }
+        }
+
+        // _/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/
         //     Constructor
         // _/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/
 
         /// <summary>
         /// コンストラクタ
         /// </summary>
-        public MapChipList()
+        public MapChipList() : this(MapSizeWidth.MinValue, MapSizeHeight.MinValue)
         {
-            InitializeChips(MapSizeWidth.MinValue, MapSizeHeight.MinValue);
         }
 
         /// <summary>
@@ -62,6 +92,8 @@ namespace WodiLib.Map
         public MapChipList(MapSizeWidth width, MapSizeHeight height)
         {
             InitializeChips(width, height);
+            CollectionChanged += OnThisCollectionChanged;
+            this[0].PropertyChanged += OnItem0PropertyChanged;
         }
 
         /// <summary>
@@ -100,6 +132,9 @@ namespace WodiLib.Map
             }
 
             Overwrite(0, chips);
+
+            CollectionChanged += OnThisCollectionChanged;
+            this[0].PropertyChanged += OnItem0PropertyChanged;
         }
 
         // _/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/
@@ -138,13 +173,20 @@ namespace WodiLib.Map
             }
 
             Overwrite(0, initChips);
+
+            NotifyPropertyChanged(nameof(Width));
+            NotifyPropertyChanged(nameof(Height));
         }
 
         /// <summary>
         /// サイズ横を更新する。
         /// </summary>
         /// <param name="value">マップサイズ横</param>
-        public void UpdateWidth(MapSizeWidth value) => AdjustLength(value);
+        public void UpdateWidth(MapSizeWidth value)
+        {
+            AdjustLength(value);
+            NotifyPropertyChanged(nameof(Width));
+        }
 
         /// <summary>
         /// マップサイズ縦を更新する。

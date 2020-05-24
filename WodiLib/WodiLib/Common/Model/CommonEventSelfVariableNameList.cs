@@ -18,7 +18,8 @@ namespace WodiLib.Common
     /// コモンイベントセルフ変数名リスト
     /// </summary>
     [Serializable]
-    public class CommonEventSelfVariableNameList : FixedLengthList<CommonEventSelfVariableName>
+    public class CommonEventSelfVariableNameList : FixedLengthList<CommonEventSelfVariableName>,
+        IReadOnlyCommonEventSelfVariableNameList
     {
         // _/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/
         //     Public Constant
@@ -41,10 +42,12 @@ namespace WodiLib.Common
         /// <summary>
         /// コンストラクタ
         /// </summary>
-        /// <param name="list">[NotNull] 初期リスト</param>
-        /// <exception cref="ArgumentNullException">listがnullの場合</exception>
-        /// <exception cref="InvalidOperationException">listの要素数が100以外の場合</exception>
-        public CommonEventSelfVariableNameList(IReadOnlyCollection<CommonEventSelfVariableName> list) : base(list)
+        /// <param name="items">[NotNull] 初期リスト</param>
+        /// <exception cref="ArgumentNullException">itemsがnullの場合</exception>
+        /// <exception cref="InvalidOperationException">itemsの要素数が100以外の場合</exception>
+        public CommonEventSelfVariableNameList(
+            IEnumerable<CommonEventSelfVariableName> items)
+            : base(items)
         {
         }
 
@@ -102,7 +105,8 @@ namespace WodiLib.Common
         /// <param name="info">デシリアライズ情報</param>
         /// <param name="context">コンテキスト</param>
         [EditorBrowsable(EditorBrowsableState.Never)]
-        protected CommonEventSelfVariableNameList(SerializationInfo info, StreamingContext context) : base(info, context)
+        protected CommonEventSelfVariableNameList(SerializationInfo info, StreamingContext context) : base(info,
+            context)
         {
         }
     }

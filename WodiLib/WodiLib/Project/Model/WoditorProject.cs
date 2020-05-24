@@ -25,7 +25,7 @@ namespace WodiLib.Project
     /// ウディタプロジェクトクラス
     /// </summary>
     [Serializable]
-    public class WoditorProject
+    public class WoditorProject : ModelBase<WoditorProject>
     {
         // _/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/
         //     Public Property
@@ -62,42 +62,132 @@ namespace WodiLib.Project
         /// </summary>
         public TileSetSettingList TileSetSettingList => TileSetData.TileSetSettingList;
 
+        private DatabaseMergedData changeableDatabase;
+
         /// <summary>
         /// 可変DB
         /// </summary>
-        public DatabaseMergedData ChangeableDatabase { get; private set; }
+        public DatabaseMergedData ChangeableDatabase
+        {
+            get => changeableDatabase;
+            private set
+            {
+                changeableDatabase = value;
+                NotifyPropertyChanged();
+            }
+        }
+
+        private DatabaseMergedData userDatabase;
 
         /// <summary>
         /// ユーザDB
         /// </summary>
-        public DatabaseMergedData UserDatabase { get; private set; }
+        public DatabaseMergedData UserDatabase
+        {
+            get => userDatabase;
+            private set
+            {
+                userDatabase = value;
+                NotifyPropertyChanged();
+            }
+        }
+
+        private DatabaseMergedData systemDatabase;
 
         /// <summary>
         /// システムDB
         /// </summary>
-        public DatabaseMergedData SystemDatabase { get; private set; }
+        public DatabaseMergedData SystemDatabase
+        {
+            get => systemDatabase;
+            private set
+            {
+                systemDatabase = value;
+                NotifyPropertyChanged();
+            }
+        }
+
+        private EditorIniData editorIni;
 
         /// <summary>
         /// Editor.iniデータ
         /// </summary>
-        public EditorIniData EditorIni { get; private set; }
+        public EditorIniData EditorIni
+        {
+            get => editorIni;
+            private set
+            {
+                editorIni = value;
+                NotifyPropertyChanged();
+            }
+        }
+
+        private GameIniData gameIni;
 
         /// <summary>
         /// Game.iniデータ
         /// </summary>
-        public GameIniData GameIni { get; private set; }
+        public GameIniData GameIni
+        {
+            get => gameIni;
+            private set
+            {
+                gameIni = value;
+                NotifyPropertyChanged();
+            }
+        }
 
         // _/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/
         //     Private Property
         // _/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/
 
-        private CommonEventData CommonEventData { get; set; }
+        private CommonEventData commonEventData;
 
-        private MapTreeData MapTreeData { get; set; }
+        private CommonEventData CommonEventData
+        {
+            get => commonEventData;
+            set
+            {
+                commonEventData = value;
+                NotifyPropertyChanged(nameof(CommonEventList));
+            }
+        }
 
-        private MapTreeOpenStatusData MapTreeOpenStatusData { get; set; }
+        private MapTreeData mapTreeData;
 
-        private TileSetData TileSetData { get; set; }
+        private MapTreeData MapTreeData
+        {
+            get => mapTreeData;
+            set
+            {
+                mapTreeData = value;
+                NotifyPropertyChanged(nameof(MapTreeNodeList));
+            }
+        }
+
+        private MapTreeOpenStatusData mapTreeOpenStatusData;
+
+        private MapTreeOpenStatusData MapTreeOpenStatusData
+        {
+            get => mapTreeOpenStatusData;
+            set
+            {
+                mapTreeOpenStatusData = value;
+                NotifyPropertyChanged(nameof(MapTreeOpenStatusList));
+            }
+        }
+
+        private TileSetData tileSetData;
+
+        private TileSetData TileSetData
+        {
+            get => tileSetData;
+            set
+            {
+                tileSetData = value;
+                NotifyPropertyChanged(nameof(TileSetSettingList));
+            }
+        }
 
         private CommonEventDatFilePath CommonEventDatFilePath => $"{TargetDirectory}/Data/BasicData/CommonEvent.dat";
 
@@ -187,6 +277,28 @@ namespace WodiLib.Project
         // _/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/
         //     Public Method
         // _/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/
+
+        /// <summary>
+        /// 値を比較する。
+        /// </summary>
+        /// <param name="other">比較対象</param>
+        /// <returns>一致する場合、true</returns>
+        public override bool Equals(WoditorProject other)
+        {
+            if (ReferenceEquals(this, other)) return true;
+            if (ReferenceEquals(other, null)) return false;
+
+            return changeableDatabase.Equals(other.changeableDatabase)
+                   && userDatabase.Equals(userDatabase)
+                   && systemDatabase.Equals(systemDatabase)
+                   && editorIni.Equals(editorIni)
+                   && gameIni.Equals(gameIni)
+                   && commonEventData.Equals(commonEventData)
+                   && mapTreeData.Equals(mapTreeData)
+                   && userDatabase.Equals(userDatabase)
+                   && mapTreeOpenStatusData.Equals(mapTreeOpenStatusData)
+                   && tileSetData.Equals(tileSetData);
+        }
 
         #region ReadMethod
 
@@ -785,6 +897,7 @@ namespace WodiLib.Project
         /// <param name="filePath">[NotNull] 読み込むMpsファイルパス</param>
         /// <param name="mapEventId">マップイベントID</param>
         /// <param name="eventPageNumber">マップイベントページ番号</param>
+        /// <param name="isOutputFullSentence">イベントコマンド文字列完全出力フラグ</param>
         /// <param name="useCache">
         ///     プール使用フラグ
         ///     （読み込みプール内に該当データが存在する場合、プールデータを返す）
@@ -792,14 +905,22 @@ namespace WodiLib.Project
         /// <returns>イベントコマンド文字列情報リスト</returns>
         /// <exception cref="ArgumentNullException">filePathがnullの場合</exception>
         /// <exception cref="InvalidOperationException">Mpsファイルが正しく読み込めない場合</exception>
+        /// <remarks>
+        ///     <paramref name="isOutputFullSentence"/>がtrueの場合、ウディタ標準では省略される特定のイベントコマンド文字列を省略せずに出力する。
+        ///     次のコマンドが対象になる。「移動ルート」
+        /// </remarks>
         public IReadOnlyList<EventCommandSentenceInfo> GetMapEventEventCommandSentenceInfoListSync(
-            MpsFilePath filePath, MapEventId mapEventId, int eventPageNumber, bool useCache = true)
+            MpsFilePath filePath, MapEventId mapEventId, int eventPageNumber,
+            bool isOutputFullSentence = false, bool useCache = true)
         {
             var mpsData = ReadMpsFileSync(filePath, useCache);
 
             var resolver = new EventCommandSentenceResolver(CommonEventList,
                 ChangeableDatabase, UserDatabase, SystemDatabase, mpsData);
-            var desc = new EventCommandSentenceResolveDesc();
+            var desc = new EventCommandSentenceResolveDesc
+            {
+                IsOutputFullSentence = isOutputFullSentence
+            };
 
             return mpsData.MakeEventCommandSentenceInfoList(resolver, desc, mapEventId, eventPageNumber);
         }
@@ -810,6 +931,7 @@ namespace WodiLib.Project
         /// <param name="filePath">[NotNull] 読み込むMpsファイルパス</param>
         /// <param name="mapEventId">マップイベントID</param>
         /// <param name="eventPageNumber">マップイベントページ番号</param>
+        /// <param name="isOutputFullSentence">イベントコマンド文字列完全出力フラグ</param>
         /// <param name="useCache">
         ///     プール使用フラグ
         ///     （読み込みプール内に該当データが存在する場合、プールデータを返す）
@@ -818,12 +940,16 @@ namespace WodiLib.Project
         /// <exception cref="ArgumentNullException">filePathがnullの場合</exception>
         /// <exception cref="InvalidOperationException">Mpsファイルが正しく読み込めない場合</exception>
         public async Task<IReadOnlyList<EventCommandSentenceInfo>> GetMapEventEventCommandSentenceInfoListAsync(
-            MpsFilePath filePath, MapEventId mapEventId, int eventPageNumber, bool useCache = true)
+            MpsFilePath filePath, MapEventId mapEventId, int eventPageNumber,
+            bool isOutputFullSentence = false, bool useCache = true)
         {
             var mpsData = await ReadMpsFileAsync(filePath, useCache);
 
             var resolver = MakeEventCommandSentenceResolver(mpsData);
-            var desc = new EventCommandSentenceResolveDesc();
+            var desc = new EventCommandSentenceResolveDesc
+            {
+                IsOutputFullSentence = isOutputFullSentence
+            };
 
             return mpsData.MakeEventCommandSentenceInfoList(resolver, desc, mapEventId, eventPageNumber);
         }
@@ -862,6 +988,7 @@ namespace WodiLib.Project
         /// </summary>
         /// <param name="commonEventId">コモンイベントID</param>
         /// <param name="filePath">[Nullable] 表示対象マップファイルパス</param>
+        /// <param name="isOutputFullSentence">イベントコマンド文字列完全出力フラグ</param>
         /// <param name="useCache">
         ///     プール使用フラグ
         ///     （読み込みプール内に該当データが存在する場合、プールデータを返す）
@@ -876,15 +1003,24 @@ namespace WodiLib.Project
         ///     "開いているマップ情報"の代わりとする。
         ///     マップイベント情報は指定しないことも可能。このとき、マップイベント名は表示されない。
         /// </remarks>
+        /// <remarks>
+        ///     <paramref name="isOutputFullSentence"/>がtrueの場合、ウディタ標準では省略される特定のイベントコマンド文字列を省略せずに出力する。
+        ///     次のコマンドが対象になる。「移動ルート」
+        /// </remarks>
         public IReadOnlyList<EventCommandSentenceInfo> GetCommonEventEventCommandSentenceInfoListSync(
-            CommonEventId commonEventId, MpsFilePath filePath = null, bool useCache = true)
+            CommonEventId commonEventId, MpsFilePath filePath = null,
+            bool isOutputFullSentence = false, bool useCache = true)
         {
             var mapData = filePath != null
                 ? ReadMpsFileSync(filePath, useCache)
                 : null;
 
             var resolver = MakeEventCommandSentenceResolver(mapData);
-            var desc = new EventCommandSentenceResolveDesc {CommonEventId = commonEventId};
+            var desc = new EventCommandSentenceResolveDesc
+            {
+                CommonEventId = commonEventId,
+                IsOutputFullSentence = isOutputFullSentence
+            };
 
             return CommonEventList.GetCommonEventEventCommandSentenceInfoList(commonEventId, resolver, desc);
         }
@@ -894,6 +1030,7 @@ namespace WodiLib.Project
         /// </summary>
         /// <param name="commonEventId">コモンイベントID</param>
         /// <param name="filePath">[Nullable] 表示対象マップファイルパス</param>
+        /// <param name="isOutputFullSentence">イベントコマンド文字列完全出力フラグ</param>
         /// <param name="useCache">
         ///     プール使用フラグ
         ///     （読み込みプール内に該当データが存在する場合、プールデータを返す）
@@ -902,14 +1039,19 @@ namespace WodiLib.Project
         /// <exception cref="ArgumentOutOfRangeException">指定されたcommonEventIdが存在しない場合</exception>
         /// <exception cref="InvalidOperationException">Mpsファイルが正しく読み込めない場合</exception>
         public async Task<IReadOnlyList<EventCommandSentenceInfo>> GetCommonEventEventCommandSentenceInfoListAsync(
-            CommonEventId commonEventId, MpsFilePath filePath = null, bool useCache = true)
+            CommonEventId commonEventId, MpsFilePath filePath = null,
+            bool isOutputFullSentence = false, bool useCache = true)
         {
             var mapData = filePath != null
                 ? await ReadMpsFileAsync(filePath, useCache)
                 : null;
 
             var resolver = MakeEventCommandSentenceResolver(mapData);
-            var desc = new EventCommandSentenceResolveDesc {CommonEventId = commonEventId};
+            var desc = new EventCommandSentenceResolveDesc
+            {
+                CommonEventId = commonEventId,
+                IsOutputFullSentence = isOutputFullSentence
+            };
 
             return CommonEventList.GetCommonEventEventCommandSentenceInfoList(commonEventId, resolver, desc);
         }

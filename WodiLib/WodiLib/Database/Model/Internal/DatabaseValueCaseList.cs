@@ -19,7 +19,8 @@ namespace WodiLib.Database
     /// 選択肢情報リスト
     /// </summary>
     [Serializable]
-    internal class DatabaseValueCaseList : RestrictedCapacityCollection<DatabaseValueCase>
+    internal class DatabaseValueCaseList : RestrictedCapacityCollection<DatabaseValueCase>,
+        IReadOnlyDatabaseValueCaseList
     {
         // _/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/
         //      Public Constant
@@ -45,13 +46,13 @@ namespace WodiLib.Database
         /// <summary>
         /// コンストラクタ
         /// </summary>
-        /// <param name="list">初期選択肢情報リスト</param>
+        /// <param name="items">初期選択肢情報リスト</param>
         /// <exception cref="ArgumentNullException">
-        ///     listがnullの場合、
-        ///     またはlist中にnullが含まれる場合
+        ///     itemsがnullの場合、
+        ///     またはitems中にnullが含まれる場合
         /// </exception>
-        /// <exception cref="InvalidOperationException">listの要素数が不適切な場合</exception>
-        public DatabaseValueCaseList(IReadOnlyCollection<DatabaseValueCase> list) : base(list)
+        /// <exception cref="InvalidOperationException">itemsの要素数が不適切な場合</exception>
+        public DatabaseValueCaseList(IEnumerable<DatabaseValueCase> items) : base(items)
         {
         }
 
@@ -85,8 +86,7 @@ namespace WodiLib.Database
         public string GetDescriptionForCaseNumber(int caseNumber)
         {
             var info = GetForCaseNumber(caseNumber);
-            if (info is null) return null;
-            return GetForCaseNumber(caseNumber).Description;
+            return info?.Description;
         }
 
         /// <summary>

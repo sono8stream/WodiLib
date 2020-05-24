@@ -1,5 +1,5 @@
 WodiLib
-Ver 1.1.0
+Ver 1.2.1
 ====
 
 Description
@@ -37,6 +37,13 @@ Loadmap
 
 History
 ----------
+
+- 2020/04/25 Ver 1.2.1
+  - バイナリデータ出力時、特定のコマンドが正しく出力されない不具合修正(#8)
+
+- 2020/04/12 Ver 1.2.0
+  - INotifyPropertyCahgend, INotifyCollectionChanged 対応
+  - メソッドやプロパティで使用するListなどの見直し
 
 - 2019/12/01 Ver 1.1.0
   - シリアライズ/デシリアライズ対応

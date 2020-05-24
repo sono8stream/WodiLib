@@ -53,13 +53,13 @@ namespace WodiLib.Database
         /// <summary>
         /// コンストラクタ
         /// </summary>
-        /// <param name="list">初期DB項目設定リスト</param>
+        /// <param name="items">初期DB項目設定リスト</param>
         /// <exception cref="ArgumentNullException">
-        ///     listがnullの場合、
-        ///     またはlist中にnullが含まれる場合
+        ///     itemsがnullの場合、
+        ///     またはitems中にnullが含まれる場合
         /// </exception>
-        /// <exception cref="InvalidOperationException">listの要素数が不適切な場合</exception>
-        public DBItemSettingList(IReadOnlyCollection<DBItemSetting> list) : base(list)
+        /// <exception cref="InvalidOperationException">itemsの要素数が不適切な場合</exception>
+        public DBItemSettingList(IEnumerable<DBItemSetting> items) : base(items)
         {
         }
 
@@ -141,8 +141,8 @@ namespace WodiLib.Database
             // ---------- 項目メモ、特殊指定文字列パラメータ、特殊指定す内パラメータ、初期値
 
             var itemMemos = new List<ItemMemo>();
-            var specialCaseDescriptions = new List<List<DatabaseValueCaseDescription>>();
-            var specialCaseNumbers = new List<List<DatabaseValueCaseNumber>>();
+            var specialCaseDescriptions = new List<IReadOnlyList<DatabaseValueCaseDescription>>();
+            var specialCaseNumbers = new List<IReadOnlyList<DatabaseValueCaseNumber>>();
             var initValues = new List<DBItemValue>();
 
             var useDataList = Items.Select(x => x.SpecialSettingDesc);
@@ -170,7 +170,7 @@ namespace WodiLib.Database
                 // 文字列パラメータ数
                 result.AddRange(x.Count.ToBytes(Endian.Woditor));
                 // 文字列パラメータ
-                x.ForEach(y =>
+                x.ForEach((y, _) =>
                     result.AddRange(y.ToWoditorStringBytes()));
             });
 
@@ -183,7 +183,7 @@ namespace WodiLib.Database
                 // 数値パラメータ数
                 result.AddRange(x.Count.ToBytes(Endian.Woditor));
                 // 数値パラメータ
-                x.ForEach(y =>
+                x.ForEach((y, _) =>
                     result.AddRange(y.ToBytes(Endian.Woditor)));
             });
 

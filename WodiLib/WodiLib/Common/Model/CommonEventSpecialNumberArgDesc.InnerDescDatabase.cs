@@ -22,7 +22,8 @@ namespace WodiLib.Common
         /// コモンイベント引数特殊指定情報内部クラス・データベース参照
         /// </summary>
         [Serializable]
-        internal class InnerDescDatabase : IInnerDesc, IEquatable<InnerDescDatabase>, ISerializable
+        internal class InnerDescDatabase : ModelBase<InnerDescDatabase>,
+            IInnerDesc, ISerializable
         {
             // _/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/
             //     Public Property
@@ -41,38 +42,60 @@ namespace WodiLib.Common
             /// DB参照時のDB種別
             /// </summary>
             /// <exception cref="PropertyException">特殊指定が「データベース参照」以外の場合</exception>
-            public DBKind DatabaseDbKind
+            public DBKind DatabaseUseDbKind
             {
                 get => databaseDbKind;
                 private set
                 {
                     if (value is null)
                         throw new PropertyNullException(
-                            ErrorMessage.NotNull(nameof(DatabaseDbKind)));
+                            ErrorMessage.NotNull(nameof(DatabaseUseDbKind)));
                     databaseDbKind = value;
+                    NotifyPropertyChanged();
                 }
             }
+
+            private TypeId databaseDbTypeId;
 
             /// <inheritdoc />
             /// <summary>
             /// DB参照時のタイプID
             /// </summary>
             /// <exception cref="PropertyException">特殊指定が「データベース参照」以外の場合</exception>
-            public TypeId DatabaseDbTypeId { get; private set; }
+            public TypeId DatabaseDbTypeId
+            {
+                get => databaseDbTypeId;
+                set
+                {
+                    databaseDbTypeId = value;
+                    NotifyPropertyChanged();
+                }
+            }
+
+            private bool databaseUseAdditionalItemsFlag;
 
             /// <inheritdoc />
             /// <summary>
             /// DB参照時の追加項目使用フラグ
             /// </summary>
             /// <exception cref="PropertyException">参照種別が「データベース参照」以外の場合</exception>
-            public bool DatabaseUseAdditionalItemsFlag { get; private set; }
-
-            // _/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/
-            //     Private Property
-            // _/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/
+            public bool DatabaseUseAdditionalItemsFlag
+            {
+                get => databaseUseAdditionalItemsFlag;
+                set
+                {
+                    databaseUseAdditionalItemsFlag = value;
+                    NotifyPropertyChanged();
+                }
+            }
 
             /// <summary>選択肢リスト</summary>
             private CommonEventSpecialArgCaseList ArgCaseList { get; set; }
+
+            /// <summary>
+            /// 【読み取り専用】選択肢情報リスト
+            /// </summary>
+            public IReadOnlyCommonEventSpecialArgCaseList SpecialArgCaseList => ArgCaseList;
 
             // _/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/
             //     Constructor
@@ -101,7 +124,7 @@ namespace WodiLib.Common
                     throw new ArgumentNullException(
                         ErrorMessage.NotNull(nameof(dbKind)));
 
-                DatabaseDbKind = dbKind;
+                DatabaseUseDbKind = dbKind;
                 DatabaseDbTypeId = dbTypeId;
             }
 
@@ -121,7 +144,7 @@ namespace WodiLib.Common
             /// 引数種別によらずすべての選択肢を取得する。
             /// </summary>
             /// <returns>すべての選択肢リスト</returns>
-            public List<CommonEventSpecialArgCase> GetAllSpecialCase()
+            public IReadOnlyList<CommonEventSpecialArgCase> GetAllSpecialCase()
             {
                 // -1～-3を使用しない場合は空リストで良い
                 if (!DatabaseUseAdditionalItemsFlag) return new List<CommonEventSpecialArgCase>();
@@ -133,11 +156,11 @@ namespace WodiLib.Common
             /// すべての選択肢番号を取得する。
             /// </summary>
             /// <returns>すべての選択肢リスト</returns>
-            public List<int> GetAllSpecialCaseNumber()
+            public IReadOnlyList<int> GetAllSpecialCaseNumber()
             {
                 return new List<int>
                 {
-                    DatabaseDbKind.SpecialArgCode,
+                    DatabaseUseDbKind.SpecialArgCode,
                     DatabaseDbTypeId,
                     DatabaseUseAdditionalItemsFlag ? 1 : 0
                 };
@@ -148,7 +171,7 @@ namespace WodiLib.Common
             /// すべての選択肢文字列を取得する。
             /// </summary>
             /// <returns>すべての選択肢リスト</returns>
-            public List<string> GetAllSpecialCaseDescription()
+            public IReadOnlyList<string> GetAllSpecialCaseDescription()
             {
                 if (!DatabaseUseAdditionalItemsFlag) return new List<string>();
 
@@ -285,7 +308,7 @@ namespace WodiLib.Common
                 if (ReferenceEquals(other, this)) return true;
                 if (ArgType != other.ArgType) return false;
                 if (!(other is InnerDescDatabase casted)) return false;
-                return Equals(casted);
+                return Equals((IEquatable<InnerDescDatabase>) casted);
             }
 
             /// <summary>
@@ -293,7 +316,7 @@ namespace WodiLib.Common
             /// </summary>
             /// <param name="other">比較対象</param>
             /// <returns>一致する場合、true</returns>
-            public bool Equals(InnerDescDatabase other)
+            public override bool Equals(InnerDescDatabase other)
             {
                 if (ReferenceEquals(other, null)) return false;
                 if (ReferenceEquals(other, this)) return true;

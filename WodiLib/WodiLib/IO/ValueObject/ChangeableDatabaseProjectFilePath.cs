@@ -17,7 +17,8 @@ namespace WodiLib.IO
     /// 可変データベースプロジェクトファイル名
     /// </summary>
     [Serializable]
-    public class ChangeableDatabaseProjectFilePath : DatabaseProjectFilePath, IEquatable<ChangeableDatabaseProjectFilePath>
+    public class ChangeableDatabaseProjectFilePath : DatabaseProjectFilePath,
+        IEquatable<ChangeableDatabaseProjectFilePath>
     {
         // _/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/
         //     Public Constant
@@ -47,6 +48,9 @@ namespace WodiLib.IO
         /// <summary>
         /// コンストラクタ
         /// </summary>
+        /// <remarks>
+        ///     ファイル名が "CDataBase.project" ではない場合、警告ログを出力する。
+        /// </remarks>
         /// <param name="value">[NotNull][NotNewLine] ファイルパス</param>
         /// <exception cref="ArgumentNullException">valueがnullの場合</exception>
         /// <exception cref="ArgumentNewLineException">
@@ -54,8 +58,7 @@ namespace WodiLib.IO
         ///     または255byteを超える場合
         /// </exception>
         /// <exception cref="ArgumentException">
-        ///     valueがファイルパスとして不適切な場合、
-        ///     またはファイル名が"CDataBase.project"ではない場合
+        ///     valueがファイルパスとして不適切な場合
         /// </exception>
         public ChangeableDatabaseProjectFilePath(string value) : base(value)
         {

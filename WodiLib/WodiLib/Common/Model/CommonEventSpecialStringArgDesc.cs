@@ -17,8 +17,8 @@ namespace WodiLib.Common
     /// コモンイベント文字列引数特殊指定情報クラス
     /// </summary>
     [Serializable]
-    public class CommonEventSpecialStringArgDesc : ICommonEventSpecialArgDesc,
-        IEquatable<CommonEventSpecialStringArgDesc>
+    public class CommonEventSpecialStringArgDesc : ModelBase<CommonEventSpecialStringArgDesc>,
+        ICommonEventSpecialArgDesc
     {
         // _/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/
         //     Public Property
@@ -39,6 +39,7 @@ namespace WodiLib.Common
                     throw new PropertyNullException(
                         ErrorMessage.NotNull(nameof(ArgName)));
                 argName = value;
+                NotifyPropertyChanged();
             }
         }
 
@@ -62,7 +63,7 @@ namespace WodiLib.Common
         /// 引数種別によらずすべての選択肢を取得する。
         /// </summary>
         /// <returns>すべての選択肢リスト</returns>
-        public List<CommonEventSpecialArgCase> GetAllSpecialCase()
+        public IReadOnlyList<CommonEventSpecialArgCase> GetAllSpecialCase()
         {
             // 文字列引数は選択肢なし
             return new List<CommonEventSpecialArgCase>();
@@ -72,7 +73,7 @@ namespace WodiLib.Common
         /// すべての選択肢番号を取得する。
         /// </summary>
         /// <returns>すべての選択肢リスト</returns>
-        public List<int> GetAllSpecialCaseNumber()
+        public IReadOnlyList<int> GetAllSpecialCaseNumber()
         {
             // 文字列引数は選択肢なし
             return new List<int>();
@@ -82,7 +83,7 @@ namespace WodiLib.Common
         /// すべての選択肢文字列を取得する。
         /// </summary>
         /// <returns>すべての選択肢リスト</returns>
-        public List<string> GetAllSpecialCaseDescription()
+        public IReadOnlyList<string> GetAllSpecialCaseDescription()
         {
             // 文字列引数は選択肢なし
             return new List<string>();
@@ -98,7 +99,7 @@ namespace WodiLib.Common
             if (ReferenceEquals(other, this)) return true;
             if (ReferenceEquals(other, null)) return false;
             if (!(other is CommonEventSpecialStringArgDesc casted)) return false;
-            return Equals(casted);
+            return Equals((IEquatable<CommonEventSpecialStringArgDesc>) casted);
         }
 
         /// <summary>
@@ -106,7 +107,7 @@ namespace WodiLib.Common
         /// </summary>
         /// <param name="other">比較対象</param>
         /// <returns>一致する場合、true</returns>
-        public bool Equals(CommonEventSpecialStringArgDesc other)
+        public override bool Equals(CommonEventSpecialStringArgDesc other)
         {
             if (ReferenceEquals(other, this)) return true;
             if (ReferenceEquals(other, null)) return false;

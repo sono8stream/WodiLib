@@ -19,7 +19,8 @@ namespace WodiLib.Common
     /// 選択肢情報リスト
     /// </summary>
     [Serializable]
-    internal class CommonEventSpecialArgCaseList : RestrictedCapacityCollection<CommonEventSpecialArgCase>
+    public class CommonEventSpecialArgCaseList : RestrictedCapacityCollection<CommonEventSpecialArgCase>,
+        IReadOnlyCommonEventSpecialArgCaseList
     {
         // _/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/
         //     Public Constant
@@ -45,11 +46,11 @@ namespace WodiLib.Common
         /// <summary>
         /// コンストラクタ（初期値指定）
         /// </summary>
-        /// <param name="list">[NotNull] 初期リスト</param>
-        /// <exception cref="ArgumentNullException">listがnullの場合</exception>
-        /// <exception cref="InvalidOperationException">listの要素数がMaxLengthを超える場合</exception>
+        /// <param name="items">[NotNull] 初期リスト</param>
+        /// <exception cref="ArgumentNullException">itemsがnullの場合</exception>
+        /// <exception cref="InvalidOperationException">itemsの要素数がMaxLengthを超える場合</exception>
         public CommonEventSpecialArgCaseList(
-            IReadOnlyCollection<CommonEventSpecialArgCase> list) : base(list)
+            IEnumerable<CommonEventSpecialArgCase> items) : base(items)
         {
         }
 
@@ -96,8 +97,7 @@ namespace WodiLib.Common
         public string GetDescriptionForCaseNumber(int caseNumber)
         {
             var info = GetForCaseNumber(caseNumber);
-            if (info is null) return null;
-            return GetForCaseNumber(caseNumber).Description;
+            return info?.Description;
         }
 
         /// <summary>
